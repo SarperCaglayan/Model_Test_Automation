@@ -53,6 +53,24 @@ public class ValuationPage {
     @FindBy(xpath = "//select[@id=\"CONDITION\"]")
     public WebElement conditionOptions;
 
+    @FindBy(xpath = "//select[@id=\"BALCONY_TYPE\"]")
+    public WebElement balconyOptions;
+
+    @FindBy(xpath = "//select[@id=\"SAUNA\"]")
+    public WebElement saunaOptions;
+
+    @FindBy(xpath = "//select[@id=\"KITCHEN_TYPE\"]")
+    public WebElement kitchenOptions;
+
+    @FindBy(xpath = "//input[@id='floor']")
+    public WebElement unitFloor;
+
+    @FindBy(xpath = "//input[@id='maintenanceFee']")
+    public WebElement maintenanceFee;
+
+    @FindBy(xpath = "(//button[@class='btn btn-success'])[1]")
+    public WebElement AddUnitButton;
+
     @FindBy(xpath = "//*[text()='Valuate unit']")
     public WebElement ValuateUnitButton;
 
@@ -83,6 +101,4 @@ public class ValuationPage {
     @FindBy(xpath = "(//td[contains(@class,'text-right')])[3]")
     public WebElement floorValue;
 
-
-    //select[@id="CONDITION"]
 }

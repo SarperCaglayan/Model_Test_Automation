@@ -1,18 +1,20 @@
 package skenarios.utilities;
 
 import org.apache.poi.ss.usermodel.*;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 
 public class ExcelOI {
 
+    @Test
     public void ReadFromExcel() throws IOException {
         String path= "C:\\Users\\u_arg\\Downloads\\Comparable_import_2.xlsx";
         Workbook workbook= WorkbookFactory.create(new File(path));
         Sheet sheet = workbook.getSheet("Buildings");
         Sheet sheet2= workbook.getSheet("Units");
-        Row row0 = sheet.getRow(1);
+        Row row0 = sheet.getRow(5);
         Cell country= row0.getCell(0);
         Cell cityXlsx = row0.getCell(1);
         Cell addressCellValue = row0.getCell(2);
@@ -26,9 +28,10 @@ public class ExcelOI {
         Cell floorsXlsx = row0.getCell(8);
         Cell ownLotXlsx = row0.getCell(9);
 
-        Row row2= sheet2.getRow(1);
+        Row row2= sheet2.getRow(5);
         Cell unitIdXlsx= row2.getCell(1);
         Cell floorAreaXlsx = row2.getCell(2);
+        System.out.println("floorAreaXlsx.getNumericCellValue() = " + floorAreaXlsx.getNumericCellValue());
         Cell roomsXlsx = row2.getCell(3);
         System.out.println("roomsXlsx = " + roomsXlsx);
         Cell unitFloorXlsx = row2.getCell(4);

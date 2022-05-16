@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
+import static org.hamcrest.Matchers.equalTo;
+
 public class ValuationPageSteps {
 
     ValuationPage valuationPage = new ValuationPage();
@@ -30,7 +32,7 @@ public class ValuationPageSteps {
     Integer nextInt = faker.random().nextInt(1, 251);
 
     //Building parameters
-    Row row0 = sheet.getRow(1);
+    Row row0 = sheet.getRow(nextInt);
     Cell country = row0.getCell(0);
     Cell cityCell = row0.getCell(1);
     String cityStringCellValue = cityCell.getStringCellValue();
@@ -48,12 +50,14 @@ public class ValuationPageSteps {
     Cell buildingIdXlsx = row0.getCell(6);
     Cell groupIdXlsx = row0.getCell(7);
     Cell floorsXlsx = row0.getCell(8);
+    int FloorsValue = (int) floorsXlsx.getNumericCellValue();
+
     Cell ownLotXlsx = row0.getCell(9);
     String stringCellValue = ownLotXlsx.getStringCellValue();
     boolean ownLot = Boolean.parseBoolean(stringCellValue);
 
     //Unit parameters
-    Row row2 = sheet2.getRow(1);
+    Row row2 = sheet2.getRow(nextInt);
     Cell unitIdXlsx = row2.getCell(1);
     Cell floorAreaXlsx = row2.getCell(2);
     double floorAreaXlsxNumericCellValue = floorAreaXlsx.getNumericCellValue();
@@ -69,26 +73,15 @@ public class ValuationPageSteps {
     Cell kitchenXlsx = row2.getCell(7);
     String kitchenXlsxStringCellValue = kitchenXlsx.getStringCellValue();
     Cell saunaXlsx = row2.getCell(8);
+    String saunaValue= saunaXlsx.getStringCellValue();
     Cell maintenanceXlsx = row2.getCell(9);
     double maintenanceXlsxNumericCellValue = maintenanceXlsx.getNumericCellValue();
-
-
-    String address = "";
-    String postalcode= "01390";
-    String city= "Vantaa";
-    String buildYear= "2022";
-    String floorArea= "63";
-    String noOfRooms= "3";
-    String noOfFloors= "1";
-    Boolean lotOwned = false;
-    String condition= "New";
 
     public ValuationPageSteps() throws IOException {
     }
 
 
     public void Setup() throws IOException {
-
 
      LinkedHashMap<String, Object> data =new LinkedHashMap<String,Object>();
         data.put("lat", 64.11);
@@ -124,14 +117,14 @@ public class ValuationPageSteps {
         System.out.println("User logged in as tester");
         BrowserUtils.waitFor(5);
 
-        loginPage.portfolioButton.click();
+        /*loginPage.portfolioButton.click();
         System.out.println("User selects the portfolio");
 
         BrowserUtils.waitFor(2);
         loginPage.selectPortfolio.click();
         BrowserUtils.waitFor(2);
         loginPage.ModelAutoPortfolio.click();
-
+*/
     }
 
     @When("the User navigates to the Property Valuation page")
@@ -144,53 +137,109 @@ public class ValuationPageSteps {
 
     @When("Set the details of property and valuate unit")
     public void set_the_details_of_property_and_valuate_unit() {
-        System.out.println("stringCellAddress = " + stringCellAddress);
+        int rowNum = nextInt;
+        System.out.println("Selected row = " + (rowNum+1));
+
+        valuationPage.valuationSearch.clear();
+        System.out.println("Address = " + stringCellAddress);
         valuationPage.valuationSearch.sendKeys(stringCellAddress);
         BrowserUtils.waitFor(6);
-        //valuationPage.AddUnitButton.click();
-        valuationPage.validateResidentialButton.click();
+        valuationPage.AddUnitButton.click();
+        //valuationPage.validateResidentialButton.click();
         BrowserUtils.waitFor(4);
+        valuationPage.addressInput.clear();
         valuationPage.addressInput.sendKeys(stringCellAddress);
-        System.out.println("stringCellPostCode = " + stringCellPostCode);
+
+        valuationPage.postalCodeInput.clear();
         valuationPage.postalCodeInput.sendKeys(stringCellPostCode);
-        System.out.println("cityStringCellValue = " + cityStringCellValue);
+        System.out.println("Postcode = " + stringCellPostCode);
+
+        valuationPage.cityInput.clear();
         valuationPage.cityInput.sendKeys(cityStringCellValue);
-        System.out.println("buildingTypeXlsxStringCellValue = " + buildingTypeXlsxStringCellValue);
+        System.out.println("City = " + cityStringCellValue);
+
         Select select = new Select(valuationPage.buildingTypeOptions);
-        select.selectByVisibleText(buildingTypeXlsxStringCellValue);
+        System.out.println("BuildingType = " + buildingTypeXlsxStringCellValue);
+        if(buildingTypeXlsxStringCellValue.equals("holiday home")){
+            select.selectByVisibleText("Vacation home");}
+            if(buildingTypeXlsxStringCellValue.equals("Detached house")) {
+                select.selectByVisibleText("Single-family house");
+            } else
+            select.selectByVisibleText(buildingTypeXlsxStringCellValue);
+
         String buildYearStr = Integer.toString(buildYearXlsxNumericCellValue);
-        System.out.println("buildYearStr = " + buildYearStr);
+        System.out.println("Build Year = " + buildYearStr);
+        valuationPage.buildYearInput.clear();
         valuationPage.buildYearInput.sendKeys(buildYearStr);
         BrowserUtils.waitFor(2);
+
+        String floorsNumber = Integer.toString(FloorsValue);
+        valuationPage.floors.sendKeys(floorsNumber);
+        System.out.println("floorsNumber = " + floorsNumber);
+
         double floorAreaXlsxNumericCellValue = floorAreaXlsx.getNumericCellValue();
         int floorAreaXlsxNumericCellValue1 = (int) floorAreaXlsxNumericCellValue;
         String floorAreaString = Integer.toString(floorAreaXlsxNumericCellValue1);
-        System.out.println("floorAreaString = " + floorAreaString);
+        System.out.println("Floor Area = " + floorAreaString);
         valuationPage.FloorAreaInput.sendKeys(floorAreaString);
+
         int numericRoomsValue = (int) roomsXlsx.getNumericCellValue();
         String roomsValueString = Integer.toString(numericRoomsValue);
         //String roomsString = roomsXlsx.getStringCellValue();
         BrowserUtils.waitFor(2);
-        System.out.println("roomsValueString = " + roomsValueString);
         valuationPage.noOfRoomsInput.sendKeys(roomsValueString);
+        System.out.println("Number of rooms = " + roomsValueString);
+
+        String unitFloorsString = Integer.toString(numericFloorValue);
+        System.out.println("Unit Floor = " + unitFloorsString);
+        //BrowserUtils.waitFor(2);
+        if(buildingTypeXlsxStringCellValue.equals("Apartment")) {
+            valuationPage.unitFloor.sendKeys(unitFloorsString);
+        }
+
         BrowserUtils.waitFor(2);
         Select select1 = new Select(valuationPage.conditionOptions);
-        System.out.println("conditionX = " + conditionX);
-        select.selectByVisibleText(conditionX);
-        String floorsString = Integer.toString(numericFloorValue);
-        System.out.println("floorAreaString = " + floorAreaString);
-        valuationPage.floors.sendKeys(floorsString);
+        System.out.println("Condition = " + conditionX);
+        select1.selectByVisibleText(conditionX);
 
+        BrowserUtils.waitFor(2);
+        Select selectBalcony= new Select(valuationPage.balconyOptions);
+        System.out.println("Balcony type = " + stringBalconyValue);
+        selectBalcony.selectByVisibleText(stringBalconyValue);
+
+        BrowserUtils.waitFor(2);
+        Select select2 = new Select(valuationPage.kitchenOptions);
+        System.out.println("Kitchen type = " + kitchenXlsxStringCellValue);
+        select2.selectByVisibleText(kitchenXlsxStringCellValue);
+
+        BrowserUtils.waitFor(4);
+        Select select3 = new Select(valuationPage.saunaOptions);
+        System.out.println("saunaValue = " + saunaValue);
+        if (buildingTypeXlsxStringCellValue.equals("Apartment")){
+            if (saunaValue.equals("Yes")){
+                select3.selectByVisibleText("Yes");
+            }
+            else {
+            select3.selectByVisibleText("No");
+        }} else {
+            select3.selectByVisibleText(saunaValue);
+        }
         String stringCellValue = ownLotXlsx.getStringCellValue();
         boolean ownLot = Boolean.parseBoolean(stringCellValue);
-        System.out.println("ownLot = " + ownLot);
+        System.out.println("Lot type= " + ownLot);
         if (ownLot){
             valuationPage.ownLot.click();
         }
 
+        int maintenanceValue =(int)maintenanceXlsxNumericCellValue;
+        String maintenanceFeeValue = Integer.toString(maintenanceValue);
+        System.out.println("Maintenance fee = " + maintenanceFeeValue);
+        valuationPage.maintenanceFee.sendKeys(maintenanceFeeValue);
+
         BrowserUtils.waitFor(2);
         valuationPage.ValuateUnitButton.click();
         BrowserUtils.waitForVisibility(valuationPage.marketValue, 30);
+
     }
 
     @Then("User should be able to see valuation results")
@@ -203,7 +252,7 @@ public class ValuationPageSteps {
         //String accuracyText = valuationPage.valueAccuracy.getText();
         //System.out.println("accuracyText = " + accuracyText);
 
-        System.out.println("User is able to see the valuation results for a residential property");
+        System.out.println("*** User is able to see the valuation results for a residential property ***");
 
     }
 
@@ -222,15 +271,49 @@ public class ValuationPageSteps {
         String roomsValueText = valuationPage.roomsValue.getText();
         System.out.println("number of rooms = " + roomsValueText);
         String floorValueText = valuationPage.floorValue.getText();
-        System.out.println("number of floors= " + floorValueText);
+        System.out.println("Floor area = " + floorValueText);
 
         String marketValueText = valuationPage.estimatedMarketValue.getText();
         System.out.println("marketValue = " + marketValueText);
-        //Assert.assertEquals(marketValueText, "82000");
 
-        Assert.assertEquals("Number of rooms doesn't match!", roomsValueText, noOfRooms );
-        Assert.assertEquals("verify that floor area matches!", floorValueText, floorArea);
+        System.out.println("*** User is able to see that the valuation results for a residential property has saved ***");
 
-        System.out.println("User is able to see that the valuation results for a residential property has saved");
+        LinkedHashMap<String, Object> data = new LinkedHashMap<>();
+        data.put("lat", 64.11);
+        data.put("lon", 23.55);
+        data.put("balcony_type", stringBalconyValue);
+        data.put("floor_num", numericFloorValue);
+        data.put("condition", conditionX);
+        data.put("number_of_rooms", numericRoomsValue);
+        data.put("municipality", cityStringCellValue);
+        data.put("postcode", postalCodeXlsx);
+        data.put("property_type", buildingTypewithLowerCase);
+        data.put("floor_area", floorAreaXlsxNumericCellValue);
+        data.put("build_year", buildYearXlsxNumericCellValue);
+        data.put("lift", true);
+        data.put("maintainance_fee_sqm", maintenanceXlsxNumericCellValue);
+        data.put("netInternalArea", 78.0);
+        data.put("kitchen_type", kitchenXlsxStringCellValue);
+        data.put("lot_owned", ownLot);
+
+        System.out.println("data = " + data);
+        given().log().all().contentType(ContentType.JSON).header("Authorization", token)
+                .and().body(data)
+                .when().post("https://rre-value-fi.skenarios-model.net")
+                .then().assertThat().statusCode(200)
+                .and().header("Connection", equalTo("keep-alive"))
+                .and().header("Content-Encoding", equalTo("gzip"))
+                .log().all();
+
+
+        given().log().all().contentType(ContentType.JSON).header("Authorization", token)
+                .and().body(data)
+                .when().post("https://rre-rent-fi.skenarios-model.net")
+                .then().assertThat().statusCode(200)
+                .and().header("Connection", equalTo("keep-alive"))
+                .and().header("Content-Encoding", equalTo("gzip"))
+                .log().all();
+
+    }
     }
 }
