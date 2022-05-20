@@ -2,6 +2,7 @@ package skenarios.utilities;
 
 import org.apache.poi.ss.usermodel.*;
 import org.junit.Test;
+import skenarios.pages.ValuationPage;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +54,23 @@ public class ExcelOI {
         System.out.println("addressCellValue = " + addressCellValue);
 
         System.out.println("unitIdXlsx = " + unitIdXlsx);
+        BrowserUtils.waitFor(3);
+
+        ValuationPage valuationPage = new ValuationPage();
+
+        String coordinatePage = ConfigurationReader.get("gps_Url");
+        Driver.get().get(coordinatePage);
+        //valuationPage.acceptButton.click();
+        BrowserUtils.waitFor(2);
+        String stringCellAddress = addressCellValue.getStringCellValue();
+        valuationPage.coordinateAddress.sendKeys(stringCellAddress);
+        BrowserUtils.waitFor(1);
+        valuationPage.findGPS_Button.click();
+        BrowserUtils.waitFor(2);
+        String latitude = valuationPage.getLatitude.getAttribute("value");
+        System.out.println("latitude = " + latitude);
+        String longitude = valuationPage.getLongitude.getAttribute("value");
+        System.out.println("longitude = " + longitude);
 
     }
 

@@ -101,4 +101,29 @@ public class ValuationPage {
     @FindBy(xpath = "(//td[contains(@class,'text-right')])[3]")
     public WebElement floorValue;
 
+    @FindBy(xpath = "//input[@id='place']")
+    public WebElement coordinateLink;
+
+    @FindBy(xpath = "//button[@id='btnfind']")
+    public WebElement findButton;
+
+    @FindBy(xpath = "//button[@id='onetrust-accept-btn-handler']")
+    public WebElement acceptButton;
+    @FindBy(xpath = "//input[@id='lat']")
+    public WebElement latInput;
+
+    @FindBy(xpath = "//input[@id='lng']")
+    public WebElement lonInput;
+
+    @FindBy(xpath = "//input[@id='address']")
+    public WebElement coordinateAddress;
+
+    @FindBy(xpath = "(//button[@class='btn btn-primary'])[1]")
+    public WebElement findGPS_Button;
+
+    @FindBy(xpath = "//input[@id=\"latitude\"]")
+    public WebElement getLatitude;
+
+    @FindBy(xpath = "//input[@id=\"longitude\"]")
+    public WebElement getLongitude;
 }

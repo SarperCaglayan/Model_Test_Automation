@@ -5,8 +5,9 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.restassured.http.ContentType;
 import org.apache.poi.ss.usermodel.*;
-import org.junit.Assert;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.Select;
 import skenarios.pages.LoginPage;
 import skenarios.pages.ValuationPage;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
 public class ValuationPageSteps {
@@ -28,11 +30,11 @@ public class ValuationPageSteps {
     Sheet sheet = workbook.getSheet("Buildings");
     Sheet sheet2 = workbook.getSheet("Units");
 
-    Faker faker= new Faker();
+    Faker faker = new Faker();
     Integer nextInt = faker.random().nextInt(1, 251);
 
     //Building parameters
-    Row row0 = sheet.getRow(nextInt);
+    Row row0 = sheet.getRow(11);
     Cell country = row0.getCell(0);
     Cell cityCell = row0.getCell(1);
     String cityStringCellValue = cityCell.getStringCellValue();
@@ -57,7 +59,7 @@ public class ValuationPageSteps {
     boolean ownLot = Boolean.parseBoolean(stringCellValue);
 
     //Unit parameters
-    Row row2 = sheet2.getRow(nextInt);
+    Row row2 = sheet2.getRow(11);
     Cell unitIdXlsx = row2.getCell(1);
     Cell floorAreaXlsx = row2.getCell(2);
     double floorAreaXlsxNumericCellValue = floorAreaXlsx.getNumericCellValue();
@@ -73,36 +75,12 @@ public class ValuationPageSteps {
     Cell kitchenXlsx = row2.getCell(7);
     String kitchenXlsxStringCellValue = kitchenXlsx.getStringCellValue();
     Cell saunaXlsx = row2.getCell(8);
-    String saunaValue= saunaXlsx.getStringCellValue();
+    String saunaValue = saunaXlsx.getStringCellValue();
     Cell maintenanceXlsx = row2.getCell(9);
     double maintenanceXlsxNumericCellValue = maintenanceXlsx.getNumericCellValue();
 
     public ValuationPageSteps() throws IOException {
     }
-
-
-    public void Setup() throws IOException {
-
-     LinkedHashMap<String, Object> data =new LinkedHashMap<String,Object>();
-        data.put("lat", 64.11);
-        data.put("lon", 23.55);
-        data.put("balcony_type", stringBalconyValue);
-        data.put("floor_num", numericFloorValue);
-        data.put("condition", conditionX);
-        data.put("number_of_rooms", numericRoomsValue);
-        data.put("municipality", cityStringCellValue);
-        data.put("postcode", postalCodeXlsx);
-        data.put("property_type", buildingTypewithLowerCase);
-        data.put("floor_area", floorAreaXlsxNumericCellValue);
-        data.put("build_year", buildYearXlsxNumericCellValue);
-        data.put("lift", true);
-        data.put("maintainance_fee_sqm", maintenanceXlsxNumericCellValue);
-        data.put("netInternalArea", 78.0);
-        data.put("kitchen_type", kitchenXlsxStringCellValue);
-        data.put("lot_owned", ownLot);
-    }
-
-
 
     @Given("User is on the portfolio page")
     public void user_is_on_the_portfolio_page() {
@@ -112,7 +90,7 @@ public class ValuationPageSteps {
 
         LoginPage loginPage = new LoginPage();
         BrowserUtils.waitFor(5);
-        loginPage.login(ConfigurationReader.get("prod_engineer_username"),ConfigurationReader.get("prod_engineer_password"));
+        loginPage.login(ConfigurationReader.get("prod_engineer_username"), ConfigurationReader.get("prod_engineer_password"));
 
         System.out.println("User logged in as tester");
         BrowserUtils.waitFor(5);
@@ -130,15 +108,15 @@ public class ValuationPageSteps {
     @When("the User navigates to the Property Valuation page")
     public void the_user_navigates_to_the_property_valuation_page() {
         BrowserUtils.waitFor(3);
-        String valuation = ConfigurationReader.get("valuationUrl");
-        Driver.get().get(valuation);
+        String valuationPage = ConfigurationReader.get("valuationUrl");
+        Driver.get().get(valuationPage);
         BrowserUtils.waitFor(3);
     }
 
     @When("Set the details of property and valuate unit")
     public void set_the_details_of_property_and_valuate_unit() {
-        int rowNum = nextInt;
-        System.out.println("Selected row = " + (rowNum+1));
+        int rowNum = 11;
+        System.out.println("Selected row = " + (rowNum + 1));
 
         valuationPage.valuationSearch.clear();
         System.out.println("Address = " + stringCellAddress);
@@ -160,11 +138,12 @@ public class ValuationPageSteps {
 
         Select select = new Select(valuationPage.buildingTypeOptions);
         System.out.println("BuildingType = " + buildingTypeXlsxStringCellValue);
-        if(buildingTypeXlsxStringCellValue.equals("holiday home")){
-            select.selectByVisibleText("Vacation home");}
-            if(buildingTypeXlsxStringCellValue.equals("Detached house")) {
-                select.selectByVisibleText("Single-family house");
-            } else
+        if (buildingTypeXlsxStringCellValue.equals("holiday home")) {
+            select.selectByVisibleText("Vacation home");
+        }
+        if (buildingTypeXlsxStringCellValue.equals("Detached house")) {
+            select.selectByVisibleText("Single-family house");
+        } else
             select.selectByVisibleText(buildingTypeXlsxStringCellValue);
 
         String buildYearStr = Integer.toString(buildYearXlsxNumericCellValue);
@@ -193,7 +172,7 @@ public class ValuationPageSteps {
         String unitFloorsString = Integer.toString(numericFloorValue);
         System.out.println("Unit Floor = " + unitFloorsString);
         //BrowserUtils.waitFor(2);
-        if(buildingTypeXlsxStringCellValue.equals("Apartment")) {
+        if (buildingTypeXlsxStringCellValue.equals("Apartment")) {
             valuationPage.unitFloor.sendKeys(unitFloorsString);
         }
 
@@ -203,7 +182,7 @@ public class ValuationPageSteps {
         select1.selectByVisibleText(conditionX);
 
         BrowserUtils.waitFor(2);
-        Select selectBalcony= new Select(valuationPage.balconyOptions);
+        Select selectBalcony = new Select(valuationPage.balconyOptions);
         System.out.println("Balcony type = " + stringBalconyValue);
         selectBalcony.selectByVisibleText(stringBalconyValue);
 
@@ -215,23 +194,23 @@ public class ValuationPageSteps {
         BrowserUtils.waitFor(4);
         Select select3 = new Select(valuationPage.saunaOptions);
         System.out.println("saunaValue = " + saunaValue);
-        if (buildingTypeXlsxStringCellValue.equals("Apartment")){
-            if (saunaValue.equals("Yes")){
+        if (buildingTypeXlsxStringCellValue.equals("Apartment")) {
+            if (saunaValue.equals("Yes")) {
                 select3.selectByVisibleText("Yes");
+            } else {
+                select3.selectByVisibleText("No");
             }
-            else {
-            select3.selectByVisibleText("No");
-        }} else {
+        } else {
             select3.selectByVisibleText(saunaValue);
         }
         String stringCellValue = ownLotXlsx.getStringCellValue();
         boolean ownLot = Boolean.parseBoolean(stringCellValue);
         System.out.println("Lot type= " + ownLot);
-        if (ownLot){
+        if (ownLot) {
             valuationPage.ownLot.click();
         }
 
-        int maintenanceValue =(int)maintenanceXlsxNumericCellValue;
+        int maintenanceValue = (int) maintenanceXlsxNumericCellValue;
         String maintenanceFeeValue = Integer.toString(maintenanceValue);
         System.out.println("Maintenance fee = " + maintenanceFeeValue);
         valuationPage.maintenanceFee.sendKeys(maintenanceFeeValue);
@@ -278,26 +257,47 @@ public class ValuationPageSteps {
 
         System.out.println("*** User is able to see that the valuation results for a residential property has saved ***");
 
+        BrowserUtils.waitFor(5);
+        String coordinatePage = ConfigurationReader.get("coordinate_url");
+        Driver.get().get(coordinatePage);
+        valuationPage.acceptButton.click();
+        BrowserUtils.waitFor(2);
+        valuationPage.coordinateLink.sendKeys(stringCellAddress);
+        BrowserUtils.waitFor(1);
+        valuationPage.findButton.click();
+        BrowserUtils.waitFor(3);
+        String latitude = valuationPage.latInput.getAttribute("value");
+        System.out.println("latitude = " + latitude);
+        String longitude = valuationPage.lonInput.getAttribute("value");
+        System.out.println("longitude = " + longitude);
+
         LinkedHashMap<String, Object> data = new LinkedHashMap<>();
-        data.put("lat", 64.11);
-        data.put("lon", 23.55);
+        data.put("lat", 60.293110);
+        data.put("lon", 25.107220);
+
         data.put("balcony_type", stringBalconyValue);
         data.put("floor_num", numericFloorValue);
         data.put("condition", conditionX);
         data.put("number_of_rooms", numericRoomsValue);
         data.put("municipality", cityStringCellValue);
         data.put("postcode", postalCodeXlsx);
+        if (buildingTypeXlsxStringCellValue.equals("holiday home")) {
+            data.put("property_type","vacation home");
+        }
+        if (buildingTypeXlsxStringCellValue.equals("Detached house")) {
+            data.put("property_type","single-family house");
+        } else
         data.put("property_type", buildingTypewithLowerCase);
         data.put("floor_area", floorAreaXlsxNumericCellValue);
         data.put("build_year", buildYearXlsxNumericCellValue);
-        data.put("lift", true);
+        //data.put("lift", true);
         data.put("maintainance_fee_sqm", maintenanceXlsxNumericCellValue);
-        data.put("netInternalArea", 78.0);
+        //data.put("netInternalArea", 78.0);
         data.put("kitchen_type", kitchenXlsxStringCellValue);
         data.put("lot_owned", ownLot);
 
         System.out.println("data = " + data);
-        given().log().all().contentType(ContentType.JSON).header("Authorization", token)
+        given().log().all().contentType(ContentType.JSON)
                 .and().body(data)
                 .when().post("https://rre-value-fi.skenarios-model.net")
                 .then().assertThat().statusCode(200)
@@ -306,7 +306,7 @@ public class ValuationPageSteps {
                 .log().all();
 
 
-        given().log().all().contentType(ContentType.JSON).header("Authorization", token)
+        given().log().all().contentType(ContentType.JSON)
                 .and().body(data)
                 .when().post("https://rre-rent-fi.skenarios-model.net")
                 .then().assertThat().statusCode(200)
@@ -315,5 +315,5 @@ public class ValuationPageSteps {
                 .log().all();
 
     }
-    }
 }
+
