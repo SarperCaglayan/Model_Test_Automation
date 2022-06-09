@@ -77,6 +77,9 @@ public class ValuationPage {
     @FindBy(xpath = "(//td[contains(@test-id,'valuation_value')])[1]")
     public WebElement marketValue;
 
+    @FindBy(xpath = "(//td[@test-id='valuation_rent_value'])[1]")
+    public WebElement rentValue;
+
     @FindBy(xpath = "(//td[contains(@colspan,'3')])[4]")
     public WebElement marketValueM2;
 
@@ -117,6 +120,9 @@ public class ValuationPage {
 
     @FindBy(xpath = "//input[@id='address']")
     public WebElement coordinateAddress;
+
+    @FindBy(xpath = "//a[@href='#null']")
+    public WebElement clickOK;
 
     @FindBy(xpath = "(//button[@class='btn btn-primary'])[1]")
     public WebElement findGPS_Button;

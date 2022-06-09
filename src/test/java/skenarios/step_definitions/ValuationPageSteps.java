@@ -7,6 +7,9 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.http.ContentType;
 import org.apache.poi.ss.usermodel.*;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.Select;
 import skenarios.pages.LoginPage;
@@ -17,7 +20,9 @@ import skenarios.utilities.Driver;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -34,7 +39,7 @@ public class ValuationPageSteps {
     Integer nextInt = faker.random().nextInt(1, 251);
 
     //Building parameters
-    Row row0 = sheet.getRow(11);
+    Row row0 = sheet.getRow(63);
     Cell country = row0.getCell(0);
     Cell cityCell = row0.getCell(1);
     String cityStringCellValue = cityCell.getStringCellValue();
@@ -59,7 +64,7 @@ public class ValuationPageSteps {
     boolean ownLot = Boolean.parseBoolean(stringCellValue);
 
     //Unit parameters
-    Row row2 = sheet2.getRow(11);
+    Row row2 = sheet2.getRow(63);
     Cell unitIdXlsx = row2.getCell(1);
     Cell floorAreaXlsx = row2.getCell(2);
     double floorAreaXlsxNumericCellValue = floorAreaXlsx.getNumericCellValue();
@@ -115,7 +120,7 @@ public class ValuationPageSteps {
 
     @When("Set the details of property and valuate unit")
     public void set_the_details_of_property_and_valuate_unit() {
-        int rowNum = 11;
+        int rowNum = 63;
         System.out.println("Selected row = " + (rowNum + 1));
 
         valuationPage.valuationSearch.clear();
@@ -223,8 +228,12 @@ public class ValuationPageSteps {
 
     @Then("User should be able to see valuation results")
     public void user_should_be_able_to_see_valuation_results() {
+        System.out.println("*************************************************");
         String marketValueText = valuationPage.marketValue.getText();
         System.out.println("Market value = " + marketValueText);
+
+        String rentValueText = valuationPage.rentValue.getText();
+        System.out.println("Rent value = " + rentValueText);
 
         String valueM2Text = valuationPage.marketValueM2.getText();
         System.out.println("Market value (m2) = " + valueM2Text);
@@ -254,26 +263,38 @@ public class ValuationPageSteps {
 
         String marketValueText = valuationPage.estimatedMarketValue.getText();
         System.out.println("marketValue = " + marketValueText);
-
+        System.out.println("**************************************************");
         System.out.println("*** User is able to see that the valuation results for a residential property has saved ***");
 
         BrowserUtils.waitFor(5);
-        String coordinatePage = ConfigurationReader.get("coordinate_url");
+        String coordinatePage = ConfigurationReader.get("gps_Url");
         Driver.get().get(coordinatePage);
-        valuationPage.acceptButton.click();
         BrowserUtils.waitFor(2);
-        valuationPage.coordinateLink.sendKeys(stringCellAddress);
+//        valuationPage.clickOK.click();
+//        BrowserUtils.waitFor(2);
+
+        Map<String, Object> prefs = new HashMap<String, Object>();
+//Put this into prefs map to switch off browser notification
+        prefs.put("profile.default_content_setting_values.notifications", 2);
+//Create chrome options to set this prefs
+        ChromeOptions options = new ChromeOptions();
+        options.setExperimentalOption("prefs", prefs);
+//Now initialize chrome driver with chrome options which will switch off this browser notification on the chrome browser
+        WebDriver driver = new ChromeDriver(options);
+
+        String stringCellAddress = addressCellValue.getStringCellValue();
+        valuationPage.coordinateAddress.sendKeys(stringCellAddress);
         BrowserUtils.waitFor(1);
-        valuationPage.findButton.click();
-        BrowserUtils.waitFor(3);
-        String latitude = valuationPage.latInput.getAttribute("value");
+        valuationPage.findGPS_Button.click();
+        BrowserUtils.waitFor(2);
+        String latitude = valuationPage.getLatitude.getAttribute("value");
         System.out.println("latitude = " + latitude);
-        String longitude = valuationPage.lonInput.getAttribute("value");
+        String longitude = valuationPage.getLongitude.getAttribute("value");
         System.out.println("longitude = " + longitude);
 
         LinkedHashMap<String, Object> data = new LinkedHashMap<>();
-        data.put("lat", 60.293110);
-        data.put("lon", 25.107220);
+        data.put("lat", latitude);
+        data.put("lon", longitude);
 
         data.put("balcony_type", stringBalconyValue);
         data.put("floor_num", numericFloorValue);
@@ -304,7 +325,6 @@ public class ValuationPageSteps {
                 .and().header("Connection", equalTo("keep-alive"))
                 .and().header("Content-Encoding", equalTo("gzip"))
                 .log().all();
-
 
         given().log().all().contentType(ContentType.JSON)
                 .and().body(data)

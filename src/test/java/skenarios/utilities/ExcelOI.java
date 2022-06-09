@@ -2,10 +2,15 @@ package skenarios.utilities;
 
 import org.apache.poi.ss.usermodel.*;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import skenarios.pages.ValuationPage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExcelOI {
 
@@ -60,8 +65,19 @@ public class ExcelOI {
 
         String coordinatePage = ConfigurationReader.get("gps_Url");
         Driver.get().get(coordinatePage);
-        //valuationPage.acceptButton.click();
         BrowserUtils.waitFor(2);
+        valuationPage.clickOK.click();
+        BrowserUtils.waitFor(2);
+
+        Map<String, Object> prefs = new HashMap<String, Object>();
+//Put this into prefs map to switch off browser notification
+        prefs.put("profile.default_content_setting_values.notifications", 2);
+//Create chrome options to set this prefs
+        ChromeOptions options = new ChromeOptions();
+        options.setExperimentalOption("prefs", prefs);
+//Now initialize chrome driver with chrome options which will switch off this browser notification on the chrome browser
+        WebDriver driver = new ChromeDriver(options);
+
         String stringCellAddress = addressCellValue.getStringCellValue();
         valuationPage.coordinateAddress.sendKeys(stringCellAddress);
         BrowserUtils.waitFor(1);
